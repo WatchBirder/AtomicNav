@@ -1,11 +1,11 @@
 cff-version: 1.2.0
 message: "If you use AtomicNav, please cite the accompanying paper."
-title: "AtomicNav: Plug-and-Play General VLM Planning with Atomic Subgoals for RGB Vision-and-Language Navigation"
+title: "AtomicNav*: General VLM Planning with Atomic Subgoals for RGB Vision-and-Language Navigation"
 type: software
 authors:
   - name: AtomicNav Research Team
 version: 0.1.0
 date-released: 2026-09-27
-repository-code: "https://github.com/WatchBirder/AtomicNav-CVPR"
+repository-code: "https://github.com/WatchBirder/AtomicNav-Research"
 license: "NOASSERTION"
 abstract: "A research framework that connects a general VLM planner to a reusable RGB navigation executor through atomic semantic subgoals."

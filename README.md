@@ -1,6 +1,6 @@
-# AtomicNav
+# AtomicNav*
 
-**AtomicNav: Plug-and-Play General VLM Planning with Atomic Subgoals for RGB Vision-and-Language Navigation**
+**AtomicNav*: General VLM Planning with Atomic Subgoals for RGB Vision-and-Language Navigation**
 
 AtomicNav separates route-level semantic planning from low-level navigation execution. A general vision-language model converts a route instruction and visual history into short, executable subgoals. A reusable RGB executor follows each subgoal, decides when its local condition is satisfied, and emits `STOP` before the planner advances to the next subgoal.
 
