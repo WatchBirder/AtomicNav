@@ -1,9 +1,0 @@
-name: atomicnav-dev100
-task: r2r_val_unseen_development
-episodes: 100
-physical_routes: 95
-planner: gpt-6-astra
-executor: v6-rgb
-memory: causal_subtask_handoff
-annotations_per_episode: 3
-status: exploratory

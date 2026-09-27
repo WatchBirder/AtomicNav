@@ -1,30 +1,19 @@
 # Reproduction notes
 
-## Evaluation cohort
+This repository is a lightweight public snapshot of the AtomicNav interface. It does not contain the simulator, benchmark assets, model weights, or service credentials.
 
-The included development table uses the R2R `val_unseen` development cohort with 100 instruction episodes (95 physical routes). The planner receives three human route annotations where the protocol specifies them. Each row is evaluated on the same paired episode set.
+## Local example
 
-This is an integration and ablation study. It is not the official single-instruction R2R leaderboard protocol and should not be reported as such.
-
-## Metrics
-
-- **SR**: task success rate.
-- **SPL**: success weighted by path length.
-- **OSR**: oracle success rate under the recorded trajectory.
-- **NE**: final navigation error in metres.
-
-The executor, camera configuration, action budget, and stopping policy are held fixed within each paired comparison. Executor swaps are explicitly labelled because they are not equivalent policies.
-
-## Local reporting
-
-The committed table is self-contained:
+The dependency-free example exercises the public planner--executor handoff:
 
 ```bash
-python scripts/summarize_results.py results/ablation_dev100.csv
+python examples/semantic_handoff.py
 ```
 
-Full reproduction additionally requires private simulator assets, model weights, and the matching environment. Those assets are not redistributed here and no credentials are read from this repository.
+To run a real navigation experiment, connect a planner adapter and an RGB executor adapter as described in [`examples/semantic_handoff.py`](../examples/semantic_handoff.py). The adapter boundary is intentionally small so that the planner and executor can be replaced independently.
 
-## Release policy
+## Full reproduction
 
-Before a public code release, verify dataset and checkpoint licenses, remove private benchmark annotations, pin the environment, and publish raw traces only when redistribution is permitted.
+A complete run additionally requires a compatible RGB navigation environment, licensed scene data, model checkpoints, and the matching runtime configuration. Those assets are maintained separately and are not redistributed in this repository.
+
+Before any public benchmark release, verify dataset and checkpoint licenses, pin the environment, document the observation and action protocol, and publish only traces and media whose terms permit redistribution.
