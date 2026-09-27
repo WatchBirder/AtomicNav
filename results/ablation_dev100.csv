@@ -1,0 +1,14 @@
+variant,description,n,sr_percent,spl_percent,osr_percent,ne_m
+full_online,Astra + v6 executor / full online memory,100,79.00,63.64,87.00,2.5707
+text_memory,RGB + text memory,100,73.00,60.02,85.00,2.8748
+no_cross_subtask_memory,RGB / no cross-subtask memory,100,72.00,61.93,81.00,2.8731
+offline,Initial plan only,100,57.00,49.38,75.00,3.6281
+dual,Astra + released DualVLN executor,100,62.00,49.86,81.00,4.2794
+aware,Astra + AwareVLN executor,100,71.00,59.81,84.00,3.7783
+lightnav,Astra + LightNav-0 executor,100,78.00,69.79,82.00,2.6829
+sol,GPT-6 Sol + v6 executor,100,68.00,55.41,80.00,3.6559
+luna,GPT-6 Luna + v6 executor,100,56.00,46.71,67.00,4.8942
+official_whole,Released DualVLN whole-route reference,100,56.00,49.07,67.00,5.0989
+qwen_max,Qwen3.8-max + v6 executor,100,68.00,54.40,83.00,3.1566
+qwen_local,Qwen3.6-35B-A3B + v6 executor,100,47.00,37.70,54.00,5.5838
+free_delegation,Free-form delegation + v6 executor,100,71.00,61.98,80.00,3.1091

@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+*.log
+*.pid
+checkpoints/
+weights/
+data/
+outputs/
+raw_traces/
+*.mp4
+*.avi
+*.zip
+.DS_Store
