@@ -1,91 +1,113 @@
-# AtomicNav*
+<div align="center">
 
-**AtomicNav*: General VLM Planning with Atomic Subgoals for RGB Vision-and-Language Navigation**
+# AtomicNav
 
-AtomicNav separates route-level semantic planning from low-level navigation execution. A general vision-language model converts a route instruction and visual history into short, executable subgoals. A reusable RGB executor follows each subgoal, decides when its local condition is satisfied, and emits `STOP` before the planner advances to the next subgoal.
+### Generalist VLM planning with reusable atomic RGB navigation execution
 
-The design targets a practical interface between general-purpose multimodal reasoning and a navigation policy that already knows how to move in an RGB simulator.
+A small planner–executor interface for vision-and-language navigation. A generalist VLM chooses the next semantic subgoal; an RGB navigation policy carries it out and returns a local completion signal.
 
-![AtomicNav architecture](assets/architecture.svg)
+<p>
+  <a href="docs/method.md">Method</a> ·
+  <a href="docs/reproduction.md">Reproduction notes</a> ·
+  <a href="results/README.md">Results</a> ·
+  <a href="CITATION.cff">Citation</a>
+</p>
 
-## Method
+</div>
 
-```text
-route instruction + current RGB observation + causal task memory
-                                │
-                                ▼
-                    general VLM planner
-                                │  atomic subgoal
-                                ▼
-                     RGB navigation executor
-                                │  local actions + STOP
-                                ▼
-                  updated state → next subgoal
-```
+<p align="center">
+  <img src="assets/overview.png" alt="AtomicNav: generalist planning and shared RGB execution" width="100%" />
+</p>
 
-An atomic subgoal has two parts:
+AtomicNav keeps route reasoning and continuous control in separate interfaces. The planner sees the route instruction, the current RGB observation, and causal task memory. It emits one short intention with an observable completion condition. The executor acts from the current physical state until it emits `STOP`; the next planner call resumes from the state that was actually reached.
 
-1. a concise movement intention (for example, *enter the bedroom* or *walk to the stair opening*);
-2. an observable termination condition (for example, *stop fully inside the bedroom*).
+## The interface
 
-The executor is not reset at subgoal boundaries. Its physical pose and causal history are handed to the planner, so the next subgoal is grounded in the state that was actually reached.
+| Planner | Executor |
+| --- | --- |
+| Reads the full route and tracks progress across subgoals. | Runs the local RGB action loop and resolves visual ambiguity. |
+| Emits a semantic subgoal, not a long trajectory. | Emits actions and a local `STOP`. |
+| Owns global memory and decides what comes next. | Owns task-local history and completion evidence. |
 
-## Repository status
-
-This repository is a curated research snapshot. It contains the public-facing method description, the development evaluation protocol, and aggregate exploratory results. Private datasets, simulator assets, checkpoints, inference credentials, raw traces, and internal absolute paths are intentionally excluded.
-
-The current numbers are development-cohort results, not a claim of standard benchmark state of the art. See [`docs/reproduction.md`](docs/reproduction.md) for the exact scope and limitations.
-
-## Repository layout
+An atomic subgoal is deliberately simple:
 
 ```text
-.
-├── assets/                    Architecture figure
-├── configs/                   Versioned development configuration
-├── docs/                      Method, reproduction, and demo notes
-├── results/                   Curated aggregate tables only
-├── scripts/                   Small result-reporting utilities
-├── CITATION.cff
-├── NOTICE.md
-└── README.md
+instruction:  "Enter the bedroom and face the chair."
+completion:   "Stop fully inside the bedroom, facing the chair."
+scope:        "INTERMEDIATE"   # or FINAL
 ```
+
+The physical state is continuous across subgoals. A local `STOP` returns control to the planner; only a `FINAL` subgoal ends the route.
 
 ## Quick start
 
-The repository is documentation-first at this stage. To inspect the included development table:
+This public snapshot is documentation-first and dependency-light. It does not bundle the simulator, model weights, benchmark assets, or service credentials.
 
 ```bash
+git clone https://github.com/WatchBirder/AtomicNav-Research.git
+cd AtomicNav-Research
+
+# Run the dependency-free interface example
+python examples/semantic_handoff.py
+
+# Summarize the included development table
 python scripts/summarize_results.py results/ablation_dev100.csv
 ```
 
-The full simulator and model weights are maintained separately because they are large, licensed, and environment-specific. Internal reproduction requires the corresponding private asset bundle and a compatible RGB navigation executor; the public snapshot does not silently substitute paths or credentials.
+To connect your own models, implement the two small interfaces shown in [`examples/semantic_handoff.py`](examples/semantic_handoff.py):
 
-## Development results
+```python
+class Planner:
+    def next_subgoal(self, route_instruction, observation, memory):
+        ...  # call your general VLM and return AtomicSubgoal
 
-The table below reports a paired 100-episode development cohort. `SR`, `SPL`, and `OSR` are percentages; `NE` is navigation error in metres.
+class Executor:
+    def run(self, subgoal, observation):
+        ...  # call your RGB navigator and return Handoff
+```
+
+The full handoff loop is provided by `run_atomicnav_episode(...)`. The same protocol can wrap different general VLM planners or RGB executors without changing the route-level state machine.
+
+## What is included
+
+```text
+assets/overview.png             paper-style overview figure
+assets/architecture.svg         lightweight interface diagram
+examples/semantic_handoff.py   dependency-free planner/executor API example
+configs/                        versioned development configuration
+docs/                           method and reproduction notes
+results/                        curated aggregate tables
+scripts/                        small reporting utilities
+```
+
+The repository intentionally excludes private datasets, simulator assets, checkpoints, raw traces, internal paths, and credentials. See [`docs/reproduction.md`](docs/reproduction.md) for the exact release boundary and the benchmark protocol used by the included development table.
+
+## Development snapshot
+
+The included table is a paired 100-episode development cohort for integration and ablation analysis. It is not the official single-instruction R2R leaderboard protocol and should not be read as a standard SOTA claim.
 
 | Variant | SR | SPL | OSR | NE (m) |
-|---|---:|---:|---:|---:|
-| AtomicNav (full online memory) | 79.00 | 63.64 | 87.00 | 2.57 |
-| RGB + text memory | 73.00 | 60.02 | 85.00 | 2.87 |
+| --- | ---: | ---: | ---: | ---: |
+| AtomicNav (full online memory) | **79.00** | 63.64 | 87.00 | 2.57 |
 | RGB, no cross-subtask memory | 72.00 | 61.93 | 81.00 | 2.87 |
 | Initial plan only | 57.00 | 49.38 | 75.00 | 3.63 |
-| AtomicNav + DualVLN executor | 62.00 | 49.86 | 81.00 | 4.28 |
-| AtomicNav + AwareVLN executor | 71.00 | 59.81 | 84.00 | 3.78 |
-| AtomicNav + LightNav executor | 78.00 | 69.79 | 82.00 | 2.68 |
-| GPT-6 Sol planner + v6 executor | 68.00 | 55.41 | 80.00 | 3.66 |
-| GPT-6 Luna planner + v6 executor | 56.00 | 46.71 | 67.00 | 4.89 |
-| Released DualVLN whole-route reference | 56.00 | 49.07 | 67.00 | 5.10 |
-| Qwen3.8-max planner + v6 executor | 68.00 | 54.40 | 83.00 | 3.16 |
-| Qwen3.6-35B-A3B planner + v6 executor | 47.00 | 37.70 | 54.00 | 5.58 |
-| Free-form delegation + v6 executor | 71.00 | 61.98 | 80.00 | 3.11 |
 
-For definitions, cohort construction, and caveats, see [`results/README.md`](results/README.md). The aggregate CSV is [`results/ablation_dev100.csv`](results/ablation_dev100.csv).
+See [`results/ablation_dev100.csv`](results/ablation_dev100.csv) and [`results/README.md`](results/README.md) for all rows, cohort construction, and caveats.
 
-## Reproduction scope
+## Documentation
 
-The intended publication release will add the simulator adapter, model configuration, and licensed data instructions after the environment and redistribution terms are frozen. Until then, this repository should be treated as a method and provenance record rather than a one-command reproduction package.
+- [`docs/method.md`](docs/method.md) — problem setting, planner, executor, and handoff semantics.
+- [`docs/reproduction.md`](docs/reproduction.md) — evaluation cohort, metrics, and release boundary.
+- [`docs/demo.md`](docs/demo.md) — notes on public demo media and redistribution limits.
+- [`NOTICE.md`](NOTICE.md) — third-party and redistribution notices.
 
 ## Citation
 
-The citation metadata is provided in [`CITATION.cff`](CITATION.cff). The paper title and author list are provisional.
+Citation metadata is provided in [`CITATION.cff`](CITATION.cff). The paper title and author list remain provisional until the public release.
+
+<div align="center">
+
+[![Research snapshot](https://img.shields.io/badge/release-research%20snapshot-orange?style=flat-square)](https://github.com/WatchBirder/AtomicNav-Research)
+[![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+
+</div>
