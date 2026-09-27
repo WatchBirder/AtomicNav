@@ -44,8 +44,8 @@ The physical state is continuous across subgoals. A local `STOP` returns control
 This public snapshot is documentation-first and dependency-light. It does not bundle the simulator, model weights, benchmark assets, or service credentials.
 
 ```bash
-git clone https://github.com/WatchBirder/AtomicNav-Research.git
-cd AtomicNav-Research
+git clone https://github.com/WatchBirder/AtomicNav.git
+cd AtomicNav
 
 # Run the dependency-free interface example
 python examples/semantic_handoff.py
@@ -89,8 +89,9 @@ Citation metadata is provided in [`CITATION.cff`](CITATION.cff). The paper title
 
 <div align="center">
 
-[![Research snapshot](https://img.shields.io/badge/release-research%20snapshot-orange?style=flat-square)](https://github.com/WatchBirder/AtomicNav-Research)
+[![Research snapshot](https://img.shields.io/badge/release-research%20snapshot-orange?style=flat-square)](https://github.com/WatchBirder/AtomicNav)
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 
 </div>
+
 
